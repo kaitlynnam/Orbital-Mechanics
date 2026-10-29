@@ -27,14 +27,37 @@ class Body:
 
         return [x + self.center_x, y + self.center_y, z + self.center_z]
 
+    def get_planet_orbit(self):
+        return [self.center_x, self.center_y, self.center_z]
 
-    def calculate_interactions(self, other_body, timestep):
+    # def calculate_interactions(self, other_body, timestep):
 
-        dx = other_body.center_x - self.center_x
-        dy = other_body.center_y - self.center_y
+
+    #     dx = other_body.center_x - self.center_x
+    #     dy = other_body.center_y - self.center_y
+    #     distance = math.sqrt(dx ** 2 + dy ** 2)
+
+    #     force = (self.G * self.mass * other_body.mass) / distance ** 2
+
+    #     theta = math.atan2(dy, dx)
+    #     fx = force * math.cos(theta)
+    #     fy = force * math.sin(theta)
+
+    #     ax = fx / self.mass
+    #     ay = fy / self.mass
+
+    #     self.vx += ax * timestep
+    #     self.vy += ay * timestep
+
+    #     self.center_x += self.vx * timestep
+    #     self.center_y += self.vy * timestep
+
+    def acceleration_from(self, other):
+        dx = other.center_x - self.center_x
+        dy = other.center_y - self.center_y
         distance = math.sqrt(dx ** 2 + dy ** 2)
 
-        force = (self.G * self.mass * other_body.mass) / distance ** 2
+        force = (self.G * self.mass * other.mass) / distance ** 2
 
         theta = math.atan2(dy, dx)
         fx = force * math.cos(theta)
@@ -43,8 +66,4 @@ class Body:
         ax = fx / self.mass
         ay = fy / self.mass
 
-        self.vx += ax * timestep
-        self.vy += ay * timestep
-
-        self.center_x += self.vx * timestep
-        self.center_y += self.vy * timestep
+        return ax, ay

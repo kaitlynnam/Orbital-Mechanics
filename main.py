@@ -13,69 +13,91 @@ ax.set_zlim(-10, 10)
 # Set an equal aspect ratio
 ax.set_aspect('equal')
 
-earth = Body(10, 0, 0, 90, 578, 5, 0.3)
+earth = Body(10, 0, 0, 90, 450, 5, 0.3)
 
 sun = Body(0, 0, 0, 1, 0, 50000, 1)
 
 mars = Body(5, 0, 0, 40, 900, 7, 0.3)
 
-earth_shape = None
-sun_shape = None
-mars_shape = None
+
+body_shapes = []
+
+orbital_path = []
+
+bodies = [sun, earth, mars]
+
+accelerations = []
+
+dt = 0.001
+
+for body in bodies:
+     body_shapes.append([body, None])
+
+for body in bodies:
+     path = [[], [], []]
+
+     orbital_path.append((body, path))
+
+def calculate_accelerations(bodies):
+    accelerations.clear()
+    for body in bodies:
+         total_ax = 0
+         total_ay = 0
+
+         for other in bodies:
+            if body is other:
+                continue
+
+            ax, ay = body.acceleration_from(other)
+
+            total_ax += ax
+            total_ay += ay
+
+         accelerations.append((total_ax, total_ay))
+
+
+def update_positions():
+     for body, (ax, ay) in zip(bodies, accelerations):
+          body.vx += ax * dt
+          body.vy += ay * dt
+
+          body.center_x += body.vx * dt
+          body.center_y += body.vy * dt
 
 def create_planets():
 
-    global earth_shape
-    global sun_shape
-    global mars_shape
+    color = ["gold", "blue", "red"]
 
-    
+    for entry, color, path in zip(body_shapes, color, orbital_path):
+         body, shape = entry
 
-    if earth_shape is not None:
-        earth_shape.remove()
+         if shape is not None:
+                shape.remove()
 
-    if sun_shape is not None:
-        sun_shape.remove()
+         x, y, z = body.get_planet()
+         entry[1] = ax.plot_surface(x, y, z, color=color)
 
-    if mars_shape is not None:
-            mars_shape.remove()
+         orbit_x, orbit_y, orbit_z = body.get_planet_orbit()
 
-    earth_x, earth_y, earth_z = earth.get_planet()
-    earth_shape = ax.plot_surface(earth_x, earth_y, earth_z, color="blue")
+         path[1][0].append(orbit_x)
+         path[1][1].append(orbit_y)
+         path[1][2].append(orbit_z)
 
-    sun_x, sun_y, sun_z = sun.get_planet()
-    sun_shape = ax.plot_surface(sun_x, sun_y, sun_z, color="gold")
+def get_orbit():
+     for planet in orbital_path:
 
-    mars_x, mars_y, mars_z = mars.get_planet()
-    mars_shape = ax.plot_surface(mars_x, mars_y, mars_z, color="red")
-
+          x = planet[1][0]
+          y = planet[1][1]
+          z = planet[1][2]
+          ax.plot( x, y, z, linewidth= '1', color="black")
 
 def animate(i):
-    
-
-
-    # sphere.remove()
-
-    # t = i * 0.05
-
-    
-
-    # center_x = 8 * np.cos(t)
-    # center_y = 8 * np.sin(t)
-    # center_z = 0
-
-
-    # sphere = ax.plot_surface(x + center_x,
-    #                         y + center_y,
-    #                         z + center_z)
-    # return sphere
-
-    
-    earth.calculate_interactions(sun, 0.001)
-    sun.calculate_interactions(earth, 0.001)
-    mars.calculate_interactions(sun, 0.001)
+    calculate_accelerations(bodies)
+    update_positions()
 
     create_planets()
+
+    get_orbit()
 
 
 anim = animation.FuncAnimation(fig, animate, 

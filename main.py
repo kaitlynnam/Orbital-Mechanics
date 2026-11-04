@@ -39,7 +39,7 @@ for body in bodies:
      orbital_path.append((body, path))
 
 def calculate_accelerations(bodies):
-    accelerations.clear()
+    accelerations = []
     for body in bodies:
          total_ax = 0
          total_ay = 0
@@ -54,6 +54,21 @@ def calculate_accelerations(bodies):
             total_ay += ay
 
          accelerations.append((total_ax, total_ay))
+    return accelerations
+
+def velocity_verlet(bodies, dt):
+     old_acclerations = calculate_accelerations(bodies)
+
+     for body, (ax, ay) in zip (bodies, old_acclerations):
+          body.center_x += body.vx * dt + 0.5 * ax * dt**2
+          body.center_y += body.vy * dt + 0.5 * ay * dt**2
+
+     new_accelerations = calculate_accelerations(bodies)
+
+     for body, (ax_old, ay_old), (ax_new, ay_new) in zip (bodies, old_acclerations, new_accelerations):
+
+          body.vx += 0.5 * (ax_old + ax_new) * dt
+          body.vy += 0.5 * (ay_old + ay_new) * dt
 
 
 def update_positions():
@@ -93,7 +108,8 @@ def get_orbit():
 
 def animate(i):
     calculate_accelerations(bodies)
-    update_positions()
+#     update_positions()
+    velocity_verlet(bodies, dt)
 
     create_planets()
 

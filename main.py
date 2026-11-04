@@ -26,7 +26,8 @@ orbital_path = []
 
 bodies = [sun, earth, mars]
 
-accelerations = []
+old_accelerations = []
+new_accelerations = []
 
 dt = 0.001
 
@@ -39,7 +40,7 @@ for body in bodies:
      orbital_path.append((body, path))
 
 def calculate_accelerations(bodies):
-    accelerations = []
+    old_accelerations.clear()
     for body in bodies:
          total_ax = 0
          total_ay = 0
@@ -53,31 +54,24 @@ def calculate_accelerations(bodies):
             total_ax += ax
             total_ay += ay
 
-         accelerations.append((total_ax, total_ay))
-    return accelerations
+         old_accelerations.append((total_ax, total_ay))
+
+    return old_accelerations     
 
 def velocity_verlet(bodies, dt):
-     old_acclerations = calculate_accelerations(bodies)
+     old_accleration = calculate_accelerations(bodies)
 
-     for body, (ax, ay) in zip (bodies, old_acclerations):
+     for body, (ax, ay) in zip (bodies, old_accleration):
           body.center_x += body.vx * dt + 0.5 * ax * dt**2
           body.center_y += body.vy * dt + 0.5 * ay * dt**2
 
-     new_accelerations = calculate_accelerations(bodies)
-
-     for body, (ax_old, ay_old), (ax_new, ay_new) in zip (bodies, old_acclerations, new_accelerations):
+     new_acceleration = calculate_accelerations(bodies)
+     
+     for body, (ax_old, ay_old), (ax_new, ay_new) in zip (bodies, old_accleration, new_acceleration):
 
           body.vx += 0.5 * (ax_old + ax_new) * dt
           body.vy += 0.5 * (ay_old + ay_new) * dt
-
-
-def update_positions():
-     for body, (ax, ay) in zip(bodies, accelerations):
-          body.vx += ax * dt
-          body.vy += ay * dt
-
-          body.center_x += body.vx * dt
-          body.center_y += body.vy * dt
+          new_accelerations.append(ax_new, ay_new)
 
 def create_planets():
 
@@ -107,8 +101,6 @@ def get_orbit():
           ax.plot( x, y, z, linewidth= '1', color="black")
 
 def animate(i):
-    calculate_accelerations(bodies)
-#     update_positions()
     velocity_verlet(bodies, dt)
 
     create_planets()
